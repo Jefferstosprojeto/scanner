@@ -337,17 +337,28 @@ function drawCrop() {
   const c = e.corners;
   const quad = c.map((p) => p.join(',')).join(' ');
   const shade = `M0 0H${e.w}V${e.h}H0Z M${c[0]} L${c[1]} L${c[2]} L${c[3]} Z`;
-  const handles = c.map((p, i) => `
-    <circle cx="${p[0]}" cy="${p[1]}" r="${22 * k}" fill="rgba(47,191,148,.18)" stroke="none"/>
-    <circle cx="${p[0]}" cy="${p[1]}" r="${10 * k}" fill="#fff" stroke="#2fbf94" stroke-width="${3 * k}" data-i="${i}"/>`).join('');
+  const active = crop.drag;
+  const corners = c.map((p, i) => `
+    <circle cx="${p[0]}" cy="${p[1]}" r="${24 * k}" fill="rgba(47,191,148,${active === i ? '.35' : '.2'})" stroke="none"/>
+    <circle cx="${p[0]}" cy="${p[1]}" r="${11 * k}" fill="#fff" stroke="#2fbf94" stroke-width="${3 * k}"/>`).join('');
+  const mids = midpoints(c).map((p, i) => `
+    <circle cx="${p[0]}" cy="${p[1]}" r="${8 * k}" fill="${active === 4 + i ? '#2fbf94' : '#fff'}" stroke="#2fbf94" stroke-width="${2.5 * k}"/>`).join('');
   crop.svg.innerHTML = `
     <path d="${shade}" fill="rgba(0,0,0,.5)" fill-rule="evenodd" stroke="none"/>
     <polygon points="${quad}" fill="none" stroke="#2fbf94" stroke-width="${2.5 * k}"/>
-    ${handles}`;
+    ${mids}${corners}`;
+}
+
+/** Pontos no meio de cada lado (arrastar move o lado inteiro). */
+function midpoints(c) {
+  return c.map((p, i) => {
+    const q = c[(i + 1) % 4];
+    return [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
+  });
 }
 
 function toImagePoint(ev) {
-  const r = crop.svg.getBoundingClientRect();
+  const r = crop.wrap.getBoundingClientRect();
   return [(ev.clientX - r.left) / crop.scale, (ev.clientY - r.top) / crop.scale];
 }
 
@@ -377,37 +388,71 @@ function updateLoupe(x, y) {
 }
 
 function bindCropEvents() {
-  crop.svg.addEventListener('pointerdown', (ev) => {
+  // O toque é tratado na área inteira (div HTML), não no SVG: o Safari do iPhone ignora
+  // `touch-action` em SVG e cancelava o arraste para rolar a página.
+  const area = crop.stage;
+  const block = (ev) => { if (ev.cancelable) ev.preventDefault(); };
+  area.addEventListener('touchstart', block, { passive: false });
+  area.addEventListener('touchmove', block, { passive: false });
+  area.addEventListener('gesturestart', block); // bloqueia o zoom de pinça do Safari
+
+  area.addEventListener('pointerdown', (ev) => {
     const e = state.edit;
-    if (!e) return;
+    if (!e || crop.drag >= 0) return;
     const p = toImagePoint(ev);
+    const targets = [...e.corners, ...midpoints(e.corners)];
     let best = -1, bd = Infinity;
-    e.corners.forEach((c, i) => {
-      const d = Math.hypot(c[0] - p[0], c[1] - p[1]);
+    targets.forEach((t, i) => {
+      // cantos têm prioridade sobre os meios dos lados
+      const d = Math.hypot(t[0] - p[0], t[1] - p[1]) * crop.scale + (i >= 4 ? 12 : 0);
       if (d < bd) { bd = d; best = i; }
     });
-    if (bd * crop.scale > 56) return; // toque longe dos cantos
+    if (bd > 70) return; // toque longe de qualquer alça
     ev.preventDefault();
     crop.drag = best;
-    crop.offset = [e.corners[best][0] - p[0], e.corners[best][1] - p[1]];
+    crop.pointerId = ev.pointerId;
+    crop.start = p;
+    crop.startCorners = e.corners.map((c) => [...c]);
     crop.touched = true;
-    crop.svg.setPointerCapture(ev.pointerId);
-    updateLoupe(...e.corners[best]);
+    try { area.setPointerCapture(ev.pointerId); } catch { /* ok */ }
+    drawCrop();
+    updateLoupe(...targets[best]);
   });
-  crop.svg.addEventListener('pointermove', (ev) => {
+
+  area.addEventListener('pointermove', (ev) => {
     const e = state.edit;
-    if (crop.drag < 0 || !e) return;
+    if (crop.drag < 0 || !e || ev.pointerId !== crop.pointerId) return;
     ev.preventDefault();
     const p = toImagePoint(ev);
-    const x = Math.min(e.w, Math.max(0, p[0] + crop.offset[0]));
-    const y = Math.min(e.h, Math.max(0, p[1] + crop.offset[1]));
-    e.corners[crop.drag] = [x, y];
+    const dx = p[0] - crop.start[0], dy = p[1] - crop.start[1];
+    const clampX = (x) => Math.min(e.w, Math.max(0, x));
+    const clampY = (y) => Math.min(e.h, Math.max(0, y));
+    let focus;
+    if (crop.drag < 4) {
+      const s = crop.startCorners[crop.drag];
+      e.corners[crop.drag] = [clampX(s[0] + dx), clampY(s[1] + dy)];
+      focus = e.corners[crop.drag];
+    } else {
+      const i = crop.drag - 4, j = (i + 1) % 4;
+      for (const k of [i, j]) {
+        const s = crop.startCorners[k];
+        e.corners[k] = [clampX(s[0] + dx), clampY(s[1] + dy)];
+      }
+      focus = midpoints(e.corners)[i];
+    }
     drawCrop();
-    updateLoupe(x, y);
+    updateLoupe(...focus);
   });
-  const end = () => { crop.drag = -1; crop.loupe.classList.remove('show'); };
-  crop.svg.addEventListener('pointerup', end);
-  crop.svg.addEventListener('pointercancel', end);
+
+  const end = (ev) => {
+    if (ev.pointerId !== crop.pointerId) return;
+    crop.drag = -1;
+    crop.pointerId = null;
+    crop.loupe.classList.remove('show');
+    drawCrop();
+  };
+  area.addEventListener('pointerup', end);
+  area.addEventListener('pointercancel', end);
   window.addEventListener('resize', layoutCrop);
 }
 

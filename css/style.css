@@ -118,7 +118,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; 
 }
 .crop-wrap { position: relative; flex: none; }
 .crop-wrap img { display: block; width: 100%; height: 100%; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
-.crop-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; touch-action: none; }
+#crop-stage { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.crop-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .loupe {
   position: absolute; top: 12px; left: 12px; width: 124px; height: 124px;
   border-radius: 50%; border: 3px solid #fff; box-shadow: 0 4px 18px rgb(0 0 0 / .5);

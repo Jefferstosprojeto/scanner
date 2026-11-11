@@ -1,5 +1,5 @@
 // Service worker: deixa o app funcionando offline e instalável na tela inicial.
-const VERSION = 'scanner-v1';
+const VERSION = 'scanner-v2';
 const SHELL = [
   './',
   'index.html',
