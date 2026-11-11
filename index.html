@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b7a5f">
+  <meta name="theme-color" content="#4f46e5">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Scanner">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
   <link rel="icon" href="icons/icon-192.png">
@@ -18,37 +18,91 @@
 
   <!-- ============ Documento (tela inicial) ============ -->
   <section id="screen-home" class="screen active">
-    <header class="topbar">
-      <input id="doc-name" class="doc-name" aria-label="Nome do documento" autocomplete="off" spellcheck="false">
-      <button id="btn-new" class="icon-btn" title="Novo documento" aria-label="Novo documento">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 12v6M9 15h6"/></svg>
-      </button>
+    <header class="hero">
+      <div class="hero-row">
+        <div class="hero-text">
+          <span class="hero-kicker">Documento</span>
+          <input id="doc-name" class="doc-name" aria-label="Nome do documento" autocomplete="off" spellcheck="false">
+        </div>
+        <button id="btn-new" class="hero-btn" aria-label="Novo documento" title="Novo documento">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 12v6M9 15h6"/></svg>
+        </button>
+      </div>
+      <p id="page-count" class="hero-sub"></p>
     </header>
 
+    <div id="pick-banner" class="pick-banner" hidden>
+      <span id="pick-text"></span>
+      <button id="pick-cancel" class="pick-cancel">Cancelar</button>
+    </div>
+
     <main class="home-main">
-      <p id="page-count" class="page-count"></p>
+      <section class="tools" aria-label="Ferramentas">
+        <div class="tools-head"><h2>Ferramentas</h2></div>
+        <div class="tools-strip" id="tools-strip">
+          <label class="tool-tile" style="--tone:#4f46e5"><input type="file" class="vh in-tool" data-tool="scan" accept="image/*" capture="environment"><span class="tt-ico"><svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/></svg></span>Escanear</label>
+          <label class="tool-tile" style="--tone:#7c3aed"><input type="file" class="vh in-tool" data-tool="mega" accept="image/*" capture="environment"><span class="tt-ico"><svg viewBox="0 0 24 24"><rect x="7" y="7" width="14" height="14" rx="2"/><path d="M3 17V5a2 2 0 0 1 2-2h12"/></svg></span>Mega Scan</label>
+          <button class="tool-tile" data-tool="sign" style="--tone:#db2777"><span class="tt-ico"><svg viewBox="0 0 24 24"><path d="M3 17c3-1 4-9 7-9 2 0 1 6 3 6 1.500 0 2-2 3-2s1 3 3 3"/><path d="M3 21h18"/></svg></span>Assinar</button>
+          <button class="tool-tile" data-tool="word" style="--tone:#2563eb"><span class="tt-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M8 12l1.5 6L12 13l2.5 5L16 12"/></svg></span>Para Word</button>
+          <button class="tool-tile" data-tool="excel" style="--tone:#16a34a"><span class="tt-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></span>Para Excel</button>
+          <button class="tool-tile" data-tool="text" style="--tone:#0891b2"><span class="tt-ico"><svg viewBox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></span>Extrair texto</button>
+          <button class="tool-tile" data-tool="translate" style="--tone:#0d9488"><span class="tt-ico"><svg viewBox="0 0 24 24"><path d="M5 8l6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg></span>Traduzir</button>
+          <label class="tool-tile" style="--tone:#334155"><input type="file" class="vh in-tool" data-tool="qr" accept="image/*"><span class="tt-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg></span>QR Code</label>
+          <button class="tool-tile" data-tool="stamp" style="--tone:#ea580c"><span class="tt-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>Data e hora</button>
+          <button class="tool-tile" data-tool="idcard" style="--tone:#9333ea"><span class="tt-ico"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M5 16c.5-1.5 1.700-2 3-2s2.5.5 3 2M14 10h5M14 14h4"/></svg></span>RG / Carteira</button>
+          <button class="tool-tile" data-tool="book" style="--tone:#b45309"><span class="tt-ico"><svg viewBox="0 0 24 24"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg></span>Livro</button>
+          <label class="tool-tile" style="--tone:#0284c7"><input type="file" class="vh in-tool" data-tool="whiteboard" accept="image/*" capture="environment"><span class="tt-ico"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="13" rx="1"/><path d="M8 21l4-5 4 5M6 8h7M6 11h4"/></svg></span>Quadro branco</label>
+          <label class="tool-tile" style="--tone:#e11d48"><input type="file" class="vh in-tool" data-tool="slide" accept="image/*" capture="environment"><span class="tt-ico"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M12 17v4M8 21h8M10 8l4 2.5-4 2.5z"/></svg></span>Slides</label>
+          <label class="tool-tile" style="--tone:#ca8a04"><input type="file" class="vh in-tool" data-tool="photo" accept="image/*"><span class="tt-ico"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.8L20 9l-4.9 3.6L17 19l-5-3.6L7 19l1.9-6.4L4 9l6.1-.2z"/></svg></span>Restaurar foto</label>
+          <button class="tool-tile soon" data-soon="Foto 3x4" style="--tone:#64748b"><span class="tt-ico"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M7 19c1-2.500 3-3.500 5-3.500s4 1 5 3.500"/></svg></span>Foto 3x4<em>em breve</em></button>
+          <button class="tool-tile soon" data-soon="Apagar inteligente" style="--tone:#64748b"><span class="tt-ico"><svg viewBox="0 0 24 24"><path d="M20 20H8l-5-5 10-10 8 8-6 6M11 8l6 6"/></svg></span>Apagar<em>em breve</em></button>
+          <button class="tool-tile soon" data-soon="Lista de questões" style="--tone:#64748b"><span class="tt-ico"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg></span>Questões<em>em breve</em></button>
+          <button class="tool-tile soon" data-soon="CountCam" style="--tone:#64748b"><span class="tt-ico"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><circle cx="12" cy="12" r="2"/></svg></span>CountCam<em>em breve</em></button>
+        </div>
+      </section>
       <div id="pages" class="pages"></div>
       <div id="empty" class="empty">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>
-        <h3>Nenhuma página ainda</h3>
-        <p>Toque em <b>Câmera</b> para fotografar um documento ou em <b>Galeria</b> para importar fotos.</p>
+        <div class="empty-art" aria-hidden="true">
+          <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+        </div>
+        <h3>Escaneie seu primeiro documento</h3>
+        <p>Fotografe uma folha ou importe fotos da galeria. Depois é só gerar PDF, Word ou assinar.</p>
+        <div class="empty-actions">
+          <label class="pill-btn grad">
+            <input type="file" class="vh in-camera" accept="image/*" capture="environment">
+            <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Câmera
+          </label>
+          <label class="pill-btn soft">
+            <input type="file" class="vh in-gallery" accept="image/*" multiple>
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            Galeria
+          </label>
+        </div>
       </div>
     </main>
 
-    <nav class="bottombar">
-      <label class="action">
-        <input type="file" id="in-camera" class="vh" accept="image/*" capture="environment">
-        <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        Câmera
-      </label>
-      <label class="action">
-        <input type="file" id="in-gallery" class="vh" accept="image/*" multiple>
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        Galeria
-      </label>
-      <button id="btn-export" class="action primary" disabled>
-        <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>
-        Gerar PDF
+    <nav class="dock" aria-label="Ações do documento">
+      <button id="act-edit" class="dock-item c-edit">
+        <span class="dock-ico"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>
+        Editar
+      </button>
+      <button id="act-sign" class="dock-item c-sign">
+        <span class="dock-ico"><svg viewBox="0 0 24 24"><path d="M3 17c3-1 4-9 7-9 2 0 1 6 3 6 1.500 0 2-2 3-2s1 3 3 3"/><path d="M3 21h18"/></svg></span>
+        Assinar
+      </button>
+      <button id="act-add" class="dock-fab" aria-label="Adicionar página">
+        <span class="fab-ico"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+        Adicionar
+      </button>
+      <button id="act-word" class="dock-item c-word">
+        <span class="dock-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 12l1.5 6L12 13l2.5 5L16 12"/></svg></span>
+        Word
+      </button>
+      <button id="act-share" class="dock-item c-share">
+        <span class="dock-ico"><svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg></span>
+        Compartilhar
       </button>
     </nav>
   </section>
@@ -105,34 +159,125 @@
     </footer>
   </section>
 
+  <!-- ============ Desenhar assinatura ============ -->
+  <section id="screen-pad" class="screen">
+    <header class="topbar">
+      <button id="pad-cancel" class="text-btn">Cancelar</button>
+      <h2>Nova assinatura</h2>
+      <button id="pad-save" class="text-btn strong">Salvar</button>
+    </header>
+    <div class="pad-stage">
+      <div class="pad-card">
+        <canvas id="pad-canvas" class="pad-canvas"></canvas>
+        <div class="pad-line"><span>Assine aqui com o dedo</span></div>
+      </div>
+    </div>
+    <footer class="pad-tools">
+      <div class="swatches" id="pad-colors">
+        <button class="swatch active" data-color="#16133a" style="--c:#16133a" aria-label="Preto"></button>
+        <button class="swatch" data-color="#1d4ed8" style="--c:#1d4ed8" aria-label="Azul"></button>
+        <button class="swatch" data-color="#be123c" style="--c:#be123c" aria-label="Vermelho"></button>
+      </div>
+      <button id="pad-clear" class="pill-btn soft small">Limpar</button>
+    </footer>
+  </section>
+
+  <!-- ============ Posicionar assinatura ============ -->
+  <section id="screen-place" class="screen dark">
+    <header class="topbar">
+      <button id="place-cancel" class="text-btn">Cancelar</button>
+      <h2>Posicionar</h2>
+      <button id="place-apply" class="text-btn strong">Aplicar</button>
+    </header>
+    <div id="place-stage" class="stage">
+      <div id="place-wrap" class="place-wrap">
+        <img id="place-page" alt="" draggable="false">
+        <div id="place-sign" class="place-sign"><img id="place-sign-img" alt="" draggable="false"></div>
+      </div>
+    </div>
+    <footer class="toolbar column">
+      <label class="size-row">
+        <span>Tamanho</span>
+        <input id="place-size" type="range" min="10" max="80" value="32">
+      </label>
+      <p class="toolbar-hint">Arraste a assinatura até o lugar certo</p>
+    </footer>
+  </section>
+
   <!-- ============ Folhas (bottom sheets) ============ -->
   <div id="sheet-backdrop" class="backdrop"></div>
+
+  <div id="sheet-add" class="sheet" role="dialog" aria-label="Adicionar página">
+    <div class="grabber"></div>
+    <h3 class="sheet-title">Adicionar página</h3>
+    <div class="big-choices">
+      <label class="big-choice c-cam">
+        <input type="file" class="vh in-camera" accept="image/*" capture="environment">
+        <span class="big-ico"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
+        <b>Câmera</b><small>Fotografar agora</small>
+      </label>
+      <label class="big-choice c-gal">
+        <input type="file" class="vh in-gallery" accept="image/*" multiple>
+        <span class="big-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>
+        <b>Galeria</b><small>Uma ou várias fotos</small>
+      </label>
+    </div>
+  </div>
 
   <div id="sheet-page" class="sheet" role="dialog" aria-label="Opções da página">
     <div class="grabber"></div>
     <h3 id="page-sheet-title" class="sheet-title">Página</h3>
     <button class="sheet-item" data-act="edit">
-      <svg viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
+      <span class="si c-edit"><svg viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg></span>
       Editar recorte e filtro
     </button>
+    <button class="sheet-item" data-act="sign">
+      <span class="si c-sign"><svg viewBox="0 0 24 24"><path d="M3 17c3-1 4-9 7-9 2 0 1 6 3 6 1.500 0 2-2 3-2s1 3 3 3"/><path d="M3 21h18"/></svg></span>
+      Assinar esta página
+    </button>
+    <button class="sheet-item" data-act="unsign">
+      <span class="si c-sign"><svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></span>
+      Remover assinaturas
+    </button>
+    <button class="sheet-item" data-act="rotate">
+      <span class="si c-word"><svg viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span>
+      Girar 90°
+    </button>
     <button class="sheet-item" data-act="left">
-      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      <span class="si c-neutral"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></span>
       Mover para antes
     </button>
     <button class="sheet-item" data-act="right">
-      <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+      <span class="si c-neutral"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
       Mover para depois
     </button>
     <button class="sheet-item danger" data-act="delete">
-      <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      <span class="si c-danger"><svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></span>
       Excluir página
     </button>
   </div>
 
-  <div id="sheet-export" class="sheet" role="dialog" aria-label="Gerar PDF">
+  <div id="sheet-sign" class="sheet" role="dialog" aria-label="Escolher assinatura">
     <div class="grabber"></div>
-    <h3 class="sheet-title">Gerar PDF</h3>
+    <h3 class="sheet-title">Assinaturas</h3>
+    <div id="sign-list" class="sign-list"></div>
+    <button id="sign-new" class="btn grad">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      Criar nova assinatura
+    </button>
+  </div>
+
+  <div id="sheet-export" class="sheet" role="dialog" aria-label="Compartilhar">
+    <div class="grabber"></div>
+    <h3 class="sheet-title">Compartilhar</h3>
     <div class="field">
+      <span class="field-label">Formato</span>
+      <div class="seg" data-opt="format">
+        <button data-val="pdf">PDF</button>
+        <button data-val="jpg">Imagens JPG</button>
+      </div>
+    </div>
+    <div class="field" id="field-paper">
       <span class="field-label">Tamanho do papel</span>
       <div class="seg" data-opt="paper">
         <button data-val="a4">A4</button>
@@ -149,19 +294,70 @@
       </div>
       <span class="field-hint">Use “Pequena” para arquivos leves no WhatsApp/e-mail.</span>
     </div>
-    <button id="btn-build" class="btn primary">Gerar PDF</button>
-    <div id="export-result" class="export-result" hidden>
-      <p id="export-info" class="export-info"></p>
-      <div class="row2">
-        <button id="btn-share" class="btn primary">
-          <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>
-          Compartilhar
-        </button>
-        <button id="btn-download" class="btn">
-          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
-          Baixar
-        </button>
+    <button id="btn-build" class="btn grad">Preparar arquivo</button>
+    <div id="export-result" class="export-result" hidden></div>
+  </div>
+
+  <div id="sheet-word" class="sheet" role="dialog" aria-label="Converter para Word">
+    <div class="grabber"></div>
+    <h3 class="sheet-title">Converter para Word</h3>
+    <div class="field">
+      <span class="field-label">Conteúdo</span>
+      <div class="seg" data-opt="wordMode">
+        <button data-val="ocr">Texto editável</button>
+        <button data-val="images">Imagens</button>
       </div>
+      <span id="word-hint" class="field-hint"></span>
+    </div>
+    <button id="btn-word" class="btn word">Gerar Word (.docx)</button>
+    <div id="word-result" class="export-result" hidden></div>
+  </div>
+
+  <div id="sheet-excel" class="sheet" role="dialog" aria-label="Converter para Excel">
+    <div class="grabber"></div>
+    <h3 class="sheet-title">Converter para Excel</h3>
+    <p class="sheet-text">Lê as tabelas das páginas e cria uma planilha (.xlsx), uma aba por página. Funciona melhor com tabelas impressas e bem alinhadas.</p>
+    <button id="btn-excel" class="btn excel">Gerar Excel (.xlsx)</button>
+    <div id="excel-result" class="export-result" hidden></div>
+  </div>
+
+  <div id="sheet-text" class="sheet" role="dialog" aria-label="Texto extraído">
+    <div class="grabber"></div>
+    <h3 id="text-title" class="sheet-title">Texto extraído</h3>
+    <textarea id="text-out" class="text-out" spellcheck="false"></textarea>
+    <div id="translate-row" class="field">
+      <span class="field-label">Traduzir para</span>
+      <div class="seg" id="tr-lang">
+        <button data-val="en" class="active">Inglês</button>
+        <button data-val="es">Espanhol</button>
+        <button data-val="fr">Francês</button>
+        <button data-val="it">Italiano</button>
+      </div>
+    </div>
+    <div class="row3">
+      <button id="text-copy" class="btn">Copiar</button>
+      <button id="text-share" class="btn">Compartilhar</button>
+      <button id="text-translate" class="btn translate">Traduzir</button>
+    </div>
+  </div>
+
+  <div id="sheet-qr" class="sheet" role="dialog" aria-label="QR Code">
+    <div class="grabber"></div>
+    <h3 class="sheet-title">QR Code lido</h3>
+    <p id="qr-out" class="qr-out"></p>
+    <div class="row2">
+      <button id="qr-copy" class="btn">Copiar</button>
+      <button id="qr-open" class="btn grad">Abrir link</button>
+    </div>
+  </div>
+
+  <div id="sheet-next" class="sheet" role="dialog" aria-label="Mega Scan">
+    <div class="grabber"></div>
+    <h3 id="next-title" class="sheet-title">Página salva</h3>
+    <p class="sheet-text">Mega Scan ligado: continue fotografando as próximas páginas.</p>
+    <div class="row2">
+      <button id="next-stop" class="btn">Concluir</button>
+      <label class="btn grad"><input type="file" id="next-camera" class="vh" accept="image/*" capture="environment">Próxima página</label>
     </div>
   </div>
 
@@ -176,7 +372,11 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <div id="busy" class="busy"><div class="spinner"></div><p id="busy-text"></p></div>
+  <div id="busy" class="busy">
+    <div class="spinner"></div>
+    <p id="busy-text"></p>
+    <div class="progress" id="busy-progress" hidden><span id="busy-bar"></span></div>
+  </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
   <script type="module" src="js/app.js"></script>

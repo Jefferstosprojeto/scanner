@@ -4,6 +4,8 @@ Escaneie documentos com a câmera do iPhone, corrija a perspectiva, aplique filt
 junte várias páginas num PDF e compartilhe por WhatsApp, e-mail etc.
 
 ## Funcionalidades
+- **Ferramentas**: Escanear, Mega Scan (sequência), Assinar, Para Word (texto editável ou imagens), Para Excel, Extrair texto, Traduzir, QR Code, Data e hora, RG/Carteira (frente e verso numa A4), Livro (divide página dupla), Quadro branco, Slides, Restaurar foto
+- **Em breve**: Foto 3x4, Apagar inteligente, Lista de questões, CountCam
 - Foto pela **câmera** ou várias imagens da **galeria** (recorte automático em lote)
 - **Detecção automática das bordas** do papel (OpenCV.js, baixado na 1ª vez e guardado em cache)
 - Ajuste manual dos 4 cantos com **lupa**

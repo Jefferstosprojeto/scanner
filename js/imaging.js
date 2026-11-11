@@ -186,7 +186,35 @@ export const FILTERS = [
   { id: 'enhance', label: 'Realçar' },
   { id: 'gray', label: 'Cinza' },
   { id: 'bw', label: 'P&B' },
+  { id: 'whiteboard', label: 'Quadro branco' },
+  { id: 'slide', label: 'Slide' },
+  { id: 'photo', label: 'Foto' },
 ];
+
+/** Estica os níveis de cada canal (corta 0,5% dos extremos) e ajusta a saturação. */
+function levels(d, sat, gamma = 1) {
+  const n = d.length / 4;
+  const lo = [0, 0, 0], hi = [255, 255, 255];
+  for (let ch = 0; ch < 3; ch++) {
+    const hist = new Uint32Array(256);
+    for (let i = ch; i < d.length; i += 4) hist[d[i]]++;
+    let acc = 0;
+    for (let v = 0; v < 256; v++) { acc += hist[v]; if (acc > n * 0.005) { lo[ch] = v; break; } }
+    acc = 0;
+    for (let v = 255; v >= 0; v--) { acc += hist[v]; if (acc > n * 0.005) { hi[ch] = v; break; } }
+  }
+  const lut = [0, 1, 2].map((ch) => {
+    const t = new Uint8ClampedArray(256);
+    const span = Math.max(1, hi[ch] - lo[ch]);
+    for (let v = 0; v < 256; v++) t[v] = 255 * Math.pow(Math.min(1, Math.max(0, (v - lo[ch]) / span)), gamma);
+    return t;
+  });
+  for (let i = 0; i < d.length; i += 4) {
+    let r = lut[0][d[i]], g = lut[1][d[i + 1]], b = lut[2][d[i + 2]];
+    const l = 0.299 * r + 0.587 * g + 0.114 * b;
+    d[i] = l + (r - l) * sat; d[i + 1] = l + (g - l) * sat; d[i + 2] = l + (b - l) * sat;
+  }
+}
 
 /** Estima a cor do "papel" em cada região (remove sombras e iluminação desigual). */
 function paperBackground(canvas) {
@@ -269,7 +297,24 @@ export function applyFilter(src, filter) {
   }
   const img = src.getContext('2d').getImageData(0, 0, w, h);
   const d = img.data;
+  if (filter === 'slide' || filter === 'photo') {
+    // Slide: cores vivas e contraste; Foto: restaura fotos desbotadas com cuidado.
+    levels(d, filter === 'slide' ? 1.35 : 1.18, filter === 'slide' ? 1.1 : 0.95);
+    octx.putImageData(img, 0, 0);
+    return out;
+  }
   const bg = paperBackground(src);
+  if (filter === 'whiteboard') {
+    // Quadro branco: fundo vira branco puro e as cores das canetas ficam fortes.
+    for (let i = 0; i < d.length; i += 4) {
+      for (let k = 0; k < 3; k++) d[i + k] = Math.min(255, (d[i + k] * 275) / (bg[i + k] || 1));
+      const l = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+      if (l > 215) { d[i] = d[i + 1] = d[i + 2] = 255; continue; }
+      for (let k = 0; k < 3; k++) d[i + k] = LUT_ENHANCE[Math.max(0, Math.min(255, l + (d[i + k] - l) * 1.9)) | 0];
+    }
+    octx.putImageData(img, 0, 0);
+    return out;
+  }
   const n = d.length;
 
   for (let i = 0; i < n; i += 4) {
@@ -299,4 +344,54 @@ export function rotateCanvas(src, deg) {
   ctx.rotate((r * Math.PI) / 180);
   ctx.drawImage(src, -src.width / 2, -src.height / 2);
   return c;
+}
+
+// ---------- Assinaturas e carimbos sobre a página ----------
+
+/**
+ * Desenha os itens sobre a página e devolve o JPEG final.
+ * sign:  { type:'sign', src, ar, x, y, w }   (frações da largura/altura da página)
+ * stamp: { type:'stamp', text, color }        (canto inferior direito)
+ */
+export async function composeOverlays(baseBlob, overlays) {
+  if (!overlays || !overlays.length) return baseBlob;
+  const c = await blobToCanvas(baseBlob);
+  const ctx = c.getContext('2d');
+  const W = c.width, H = c.height;
+  for (const o of overlays) {
+    if (o.type === 'sign') {
+      const img = await loadImage(o.src);
+      const w = o.w * W;
+      ctx.drawImage(img, o.x * W, o.y * H, w, w * o.ar);
+    } else if (o.type === 'stamp') {
+      const size = Math.round(W * 0.028);
+      ctx.font = `600 ${size}px -apple-system, "Segoe UI", Roboto, sans-serif`;
+      const tw = ctx.measureText(o.text).width;
+      const pad = size * 0.5, x = W - tw - pad * 3, y = H - pad * 3;
+      ctx.fillStyle = 'rgba(255,255,255,.85)';
+      ctx.fillRect(x - pad, y - size - pad * 0.6, tw + pad * 2, size + pad * 1.6);
+      ctx.fillStyle = o.color || '#c2410c';
+      ctx.fillText(o.text, x, y);
+    }
+  }
+  const out = await toBlob(c, 'image/jpeg', 0.9);
+  release(c);
+  return out;
+}
+
+/** Ajusta a posição das assinaturas quando a página gira 90° (sentido horário). */
+export function rotateOverlays(overlays, oldW, oldH, deg) {
+  const turns = (((deg / 90) % 4) + 4) % 4;
+  return overlays.map((o) => {
+    if (o.type !== 'sign') return o;
+    let r = { ...o }, w = oldW, h = oldH;
+    for (let t = 0; t < turns; t++) {
+      const pw = r.w * w, ph = pw * r.ar;
+      const cx = r.x * w + pw / 2, cy = r.y * h + ph / 2;
+      const ncx = h - cy, ncy = cx; // (x,y) -> (H - y, x)
+      [w, h] = [h, w];
+      r = { ...r, w: pw / w, x: (ncx - pw / 2) / w, y: (ncy - ph / 2) / h };
+    }
+    return r;
+  });
 }
